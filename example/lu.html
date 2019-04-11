@@ -1,0 +1,187 @@
+<html>
+
+<head>
+  <title>Image View & Filters</title>
+  <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+  <script src="../dist/fabric.min.js"></script>
+  <script src="../dist/fabricjs_viewport.js"></script>
+
+  <style type="text/css">
+    body{
+      background: #ccc;
+    }
+    .canvas-container{
+      background: #fff;
+    }
+
+    /* The slider itself */
+    .slider {
+      -webkit-appearance: none;  /* Override default CSS styles */
+      appearance: none;
+      /* Full-width */
+      /*width: 100%; */
+      height: 10px; /* Specified height */
+      background: #706767; /* Grey background */
+      outline:#fff; /* Remove outline */
+      opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+      -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+      transition: opacity .2s;
+    }
+
+    /* Mouse-over effects */
+    .slider:hover {
+      opacity: 1; /* Fully shown on mouse-over */
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none; /* Override default look */
+      appearance: none;
+      width: 10px; /* Set a specific slider handle width */
+      height: 25px; /* Slider handle height */
+      background: #4CAF50; /* Green background */
+      cursor: pointer; /* Cursor on hover */
+      border-radius: 5px;
+    }
+
+    .slider::-moz-range-thumb {
+      width: 10px; /* Set a specific slider handle width */
+      height: 25px; /* Slider handle height */
+      background: #4CAF50; /* Green background */
+      cursor: pointer; /* Cursor on hover */
+      border-radius: 5px;
+    }
+
+    canvas{
+    }
+
+
+  </style>
+</head>
+
+<body>
+  <!--https://kangax.github.io/html-minifier/-->
+  <div class="cell">
+    <div class="buttons">
+      <button type="button" class="zoom-in">Zoom in</button>
+      <button type="button" class="zoom-out">Zoom out</button>
+      <input type="range" min="-100" max="100" value="1" class="slider" id="myRange">
+    </div>
+  
+    <canvas id="zoomable_canvas" width="600px" height="300px"></canvas>
+    <img src="../peaje.jpeg" id="mi-imagen" style="display:none" />
+  </div>
+
+  <div id="replace">
+    <p>HELLO</p>
+    <img id="rawimg"/>
+  </div>
+
+  <script src="rawImageData.js"></script>
+  <script type="text/javascript">
+
+    function addRawImage2Canvas(rawData, fabricCanvas){
+      var rawDataPrefix = "data:image/jpg;base64,"
+      var imgDOM = document.createElement("IMG");
+      if(rawData.indexOf("data"!==0)){
+        rawData = rawDataPrefix + rawData;
+      }
+      imgDOM.src = rawData;
+
+      var imgInstance = new fabric.Image(imgDOM);
+      fabricCanvas.add(imgInstance);
+    }
+
+    /*Applies brightness filter only for the first image in the canvas*/
+    function setCanvasImageBrightness(bright, fabricCanvas){
+      bright = parseInt(bright);
+      if(bright === 0){
+        bright=1;
+      }
+
+      var img = fabricCanvas.getObjects()[1];
+
+      var callback = function() {
+        fabricCanvas.renderAll();
+      }
+
+      //clear previous filters
+      img.filters.length = 0;
+      img.filters.push(
+        //new fabric.Image.filters.Sepia(),
+        new fabric.Image.filters.Brightness({ brightness: parseInt(bright) }));
+      //applyFilters is async, so you have to give it a callback method to be executed at the end.
+      img.applyFilters(callback);
+
+    }
+
+    window.onload = function () {
+
+      //Actualizar
+      var content = '<div class="cell"><div class="buttons"><button type="button" class="zoom-in">Zoom in</button><button type="button" class="zoom-out">Zoom out</button><input type="range" min="1" max="100" value="50" class="slider" id="myRange"></div><canvas id="zoomable_canvas2" width="600px" height="600px"></canvas><img src="../peaje.jpeg" id="mi-imagen2" style="display:none" /></div>';
+      //var replaceElem = document.getElementById("replace").innerHTML=content;
+
+      var c = new fabric.CanvasWithViewport("zoomable_canvas");
+      //var c = new fabric.Canvas("zoomable_canvas");
+      //set grab mode and leave it as default without giving option to change it
+      c.isDrawingMode = false;
+      c.isGrabMode = true;
+
+      var imgElement = document.getElementById('mi-imagen');
+      //imgElement.onload = function() {
+        var imgInstance = new fabric.Image(imgElement);
+        c.add(imgInstance);
+      //};
+
+      //No funciona
+      fabric.Image.fromURL = ("data:image/jpg;base64,"+aRawImageData[1], function(img){
+        var oImg = img.set({left: 0, top: 0, angle: 00,width:100, height:100}).scale(0.9);
+        c.add(oImg).renderAll();
+      });
+
+      addRawImage2Canvas(aRawImageData[1], c);
+
+
+      $(".buttons .zoom-in").click(function () {
+        c.setZoom(c.viewport.zoom * 1.1);
+        return false;
+      })
+
+      $(".buttons .zoom-out").click(function () {
+        c.setZoom(c.viewport.zoom / 1.1);
+        return false;
+      })
+
+      //---------
+      /*var ctx = c.getContext('2d');
+      ctx.fillRect(0, 0, 100, 100);*/
+
+      //Filters test
+      /*
+      var img = c.getObjects()[1];
+
+      img.filters.push(
+        new fabric.Image.filters.Sepia(),
+        new fabric.Image.filters.Brightness({ brightness: 100 }));
+
+      img.applyFilters();
+
+      c.renderAll();
+      */
+      //setCanvasImageBrightness(100, c);
+
+      document.getElementById("rawimg").src="data:image/jpg;base64,"+aRawImageData[1];
+
+      var aSliders = document.getElementsByClassName("slider");
+      for(var i=0;i<aSliders.length;i++){
+        aSliders[i].oninput = function() {
+          console.log("slider: " + this.value);
+          setCanvasImageBrightness(this.value, c);
+          
+        }
+      }
+    };
+
+  </script>
+</body>
+
+</html>
