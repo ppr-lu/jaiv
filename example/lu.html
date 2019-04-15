@@ -1,336 +1,546 @@
 <html>
 
 <head>
-  <title>Image View & Filters</title>
-  <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-  <script src="../dist/fabric.min.js"></script>
-  <script src="../dist/fabricjs_viewport.js"></script>
+    <title>Image View & Filters</title>
+    <!-- <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script> -->
+    <script src="../dist/fabric.min.js"></script>
+    <!-- <script src="../dist/fabricjs_viewport.js"></script> -->
 
-  <style type="text/css">
-    body{
-      background: #ccc;
-    }
-    .canvas-container{
-      background: #fff;
-    }
+    <style type="text/css">
+        body {
+            background: #ccc;
+        }
 
-    /* The slider itself */
-    .slider {
-      -webkit-appearance: none;  /* Override default CSS styles */
-      appearance: none;
-      /* Full-width */
-      /*width: 100%; */
-      height: 10px; /* Specified height */
-      background: #706767; /* Grey background */
-      outline:#fff; /* Remove outline */
-      opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
-      -webkit-transition: .2s; /* 0.2 seconds transition on hover */
-      transition: opacity .2s;
-    }
+        .canvas-container {
+            background: #fff;
+        }
 
-    /* Mouse-over effects */
-    .slider:hover {
-      opacity: 1; /* Fully shown on mouse-over */
-    }
+        /* The slider itself */
+        .slider {
+            -webkit-appearance: none;
+            /* Override default CSS styles */
+            appearance: none;
+            /* Full-width */
+            /*width: 100%; */
+            height: 10px;
+            /* Specified height */
+            background: #706767;
+            /* Grey background */
+            outline: #fff;
+            /* Remove outline */
+            opacity: 0.7;
+            /* Set transparency (for mouse-over effects on hover) */
+            -webkit-transition: .2s;
+            /* 0.2 seconds transition on hover */
+            transition: opacity .2s;
+        }
 
-    .slider::-webkit-slider-thumb {
-      -webkit-appearance: none; /* Override default look */
-      appearance: none;
-      width: 10px; /* Set a specific slider handle width */
-      height: 25px; /* Slider handle height */
-      background: #4CAF50; /* Green background */
-      cursor: pointer; /* Cursor on hover */
-      border-radius: 5px;
-    }
+        /* Mouse-over effects */
+        .slider:hover {
+            opacity: 1;
+            /* Fully shown on mouse-over */
+        }
 
-    .slider::-moz-range-thumb {
-      width: 10px; /* Set a specific slider handle width */
-      height: 25px; /* Slider handle height */
-      background: #4CAF50; /* Green background */
-      cursor: pointer; /* Cursor on hover */
-      border-radius: 5px;
-    }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            /* Override default look */
+            appearance: none;
+            width: 10px;
+            /* Set a specific slider handle width */
+            height: 25px;
+            /* Slider handle height */
+            background: #4CAF50;
+            /* Green background */
+            cursor: pointer;
+            /* Cursor on hover */
+            border-radius: 5px;
+        }
 
-
-  </style>
+        .slider::-moz-range-thumb {
+            width: 10px;
+            /* Set a specific slider handle width */
+            height: 25px;
+            /* Slider handle height */
+            background: #4CAF50;
+            /* Green background */
+            cursor: pointer;
+            /* Cursor on hover */
+            border-radius: 5px;
+        }
+    </style>
 </head>
 
 <body>
-  <!--https://kangax.github.io/html-minifier/-->
-  <div class="cell">
-    <div class="buttons">
-      <button type="button" class="zoom-in">+</button>
-      <button type="button" class="zoom-out">-</button>
-      <input type="range" min="-100" max="100" value="1" class="slider" id="myRange">
-      <button type="button" class="reset">O</button>
+    <!--https://kangax.github.io/html-minifier/-->
+    <div class="cell">
+        <div class="buttons">
+            <button type="button" class="zoom-in">+</button>
+            <button type="button" class="zoom-out">-</button>
+            <input type="range" min="-100" max="100" value="1" class="slider" id="myRange">
+            <button type="button" class="reset">O</button>
+        </div>
+
+        <canvas id="zoomable_canvas"></canvas>
+        <!-- <canvas id="zoomable_canvas4"></canvas> -->
+        <img id="mi-imagen" style="display:none" />
     </div>
-  
-    <canvas id="zoomable_canvas"></canvas>
-    <img id="mi-imagen" style="display:none" />
-  </div>
 
-  <div id="replace">
-    <p>REPLACE ME</p>
-    <img id="rawimg"/>
-    <table>
-      <tr>
-        <td id="c1"></td>
-        <td id="c2"></td>
-      </tr>
-        <td id="c3"></td>
-        <td id="c4"></td>
-      <tr>
-        
-      </tr>
-    </table>
-  </div>
+    <div id="replace">
+        <p>REPLACE ME</p>
+        <img id="rawimg" />
+        <table>
+            <tr>
+                <td id="c1"></td>
+                <td id="c2"></td>
+            </tr>
+            <td id="c3"></td>
+            <td id="c4"></td>
+            <tr>
 
-  <script src="rawImageData.js"></script>
-  <script type="text/javascript">
+            </tr>
+        </table>
+    </div>
 
-    function addRawImage2Canvas(rawData, fabricCanvas){
+    <script src="rawImageData.js"></script>
+    <script type="text/javascript">
+
+        function addRawImage2Canvas(rawData, fabricCanvas) {
+
+            var rawDataPrefix = "data:image/jpg;base64,"
+            var imgDOM = document.createElement("IMG");
+
+            if (rawData.indexOf("data" !== 0)) {
+                rawData = rawDataPrefix + rawData;
+            }
+
+            /*Fires when loading the image or image data specified in its src field.*/
+            imgDOM.onload = function () {
+                var imgInstance = new fabric.Image(imgDOM);
+                lockImageScaleAndRotation(imgInstance);
+                adaptCanvas2Image(imgDOM, fabricCanvas);
+                fabricCanvas.add(imgInstance);
+                fabricCanvas.renderAll();
+                imgInstance.setCoords();
+            }
+
+            imgDOM.src = rawData;
+        }
+
+        function lockImageScaleAndRotation(imgInstance) {
+            imgInstance.lockScalingX = false;
+            imgInstance.lockScalingY = false;
+            imgInstance.rotation = true;
+
+            // imgInstance.setControlsVisibility({
+            //     mt: false,
+            //     mb: false,
+            //     ml: false,
+            //     mr: false,
+            //     bl: false,
+            //     br: false,
+            //     tl: false,
+            //     tr: false,
+            //     mtr: false,
+            // });
+        }
+
+        function adaptCanvas2Image(imageElem, canvas) {
+            canvas.setWidth(imageElem.naturalWidth);
+            canvas.setHeight(imageElem.naturalHeight);
+            canvas.renderAll();
+        }
+
+        /*Applies brightness filter only for the first image in the canvas*/
+        function setCanvasImageBrightness(bright, fabricCanvas) {
+            bright = parseInt(bright);
+            if (bright === 0) {
+                bright = 1;
+            }
+
+            var img = fabricCanvas.getObjects()[0];
+
+            var callback = function () {
+                fabricCanvas.renderAll();
+            }
+
+            //clear previous filters
+            img.filters.length = 0;
+            img.filters.push(
+                //new fabric.Image.filters.Sepia(),
+                new fabric.Image.filters.Brightness({ brightness: parseInt(bright) }));
+            //applyFilters is async, so you have to give it a callback method to be executed at the end.
+            img.applyFilters(callback);
+
+        }
+
+        function checkObjectCentering(canvas) {
+            var object = canvas.getObjects()[0];
+            if (canvas.viewport) {
+
+                var convertedLeft = object.left * canvas.viewport.zoom;
+                var convertedTop = object.top * canvas.viewport.zoom;
+                var modified = false;
+
+                console.log("object.left:" + convertedLeft);
+                console.log("object.top:" + convertedTop);
+                console.log(canvas.viewport.position);
+
+                if (Math.abs(convertedLeft) > Math.abs(canvas.viewport.position.x)) {
+                    console.log("Center H");
+                    //object.left = 0;
+                    object.left = canvas.viewport.position.x / canvas.viewport.zoom;
+                    modified = true;
+                }
+
+                if (Math.abs(convertedTop) > Math.abs(canvas.viewport.position.y)) {
+                    console.log("Center V");
+                    //object.top = 0;
+                    object.top = canvas.viewport.position.y / canvas.viewport.zoom;
+                    modified = true;
+                }
+                if (modified) {
+                    /*Update image drag box*/
+                    object.setCoords();
+                    canvas.renderAll();
+                }
+            }
+            else{
+                var modified = false;
+                /*The getWidth() and getHeight() methods already take the scale into account.*/
+                //se ve fondo por la derecha => ajustar derecha
+                if( (object.getLeft() + object.getWidth()) < canvas.getWidth() ){
+                    console.log("Ajustar Derecha");
+                    object.setLeft(canvas.getWidth() - object.getWidth());
+                    modified = true;
+                }
+                //se ve fondo por la iquierda => ajustar izquierda 
+                if(object.getLeft() > 0){
+                    console.log("Ajustar Izquierda");
+                    object.setLeft(0);
+                    modified = true;
+                }
+                //se ve fondo por abajo => ajustar abajo
+                if( (object.getTop() + object.getHeight()) < canvas.getHeight() ){
+                    console.log("Ajustar Abajo");
+                    object.setTop(canvas.getHeight() - object.getHeight());
+                    modified = true;
+                }
+                //se ve fondo por  arriba => ajustar arriba
+                if(object.getTop() > 0){
+                    console.log("Ajustar Arriba");
+                    object.setTop(0);
+                    modified = true;
+                }
+                
+                if (modified) {
+                    /*Update image drag box*/
+                    object.setCoords();
+                    canvas.renderAll();
+                }
+            }
+        }
+
+        /*Given a canvas element, initializesit with fabricjs*/
+        function initCanvasWithFabric(canvasId){
+            //var canvasFabric = new fabric.CanvasWithViewport(canvasId);
+            var canvasFabric = new fabric.Canvas(canvasId);
+
+            /*Event when moving the element inside the canvas.
+            Only checks the first one inside canvas.getObjects()*/
+            canvasFabric.on({
+                'mouse:up': function () {
+                    // console.log("MOD!");
+                    checkObjectCentering(canvasFabric);
+                }
+            });
+
+            /*Event to assign functionality to the UI elements.
+            The event handlers need to be assigned after the image
+            has been added to the canvas since they need it as a variable.*/
+            canvasFabric.on({'object:added': function () {
+                    // console.log("object added");
+                    //setZoomInButtons("zoom-in", canvasFabric);
+                }
+            });
+
+            /*Dont modify these two: the eventHandlers inside on() would not work otherwise*/
+            //canvasFabric.isDrawingMode = false;
+            //canvasFabric.isGrabMode = false;
+
+            addRawImage2Canvas(aRawImageData[1], canvasFabric);
+
+        }
+
+        /*Given an HTML element, inserts a canvas inside an initializes it with fabricjs*/
+        //IMPROVEMENT: receive a list of elements
+        function insertCanvas(elem){
+            var contentTemplate = '<div class="cell"><canvas id="zoomable_canvas4" width="600px" height="600px"></canvas></div>';
+            // Options for the observer (which mutations to observe)
+            var config = { attributes: false, childList: true, subtree: false };
+            // Callback function to execute when mutations are observed
+            var callback = function (mutationsList, observer) {
+                for (var mutation of mutationsList) {
+                    if (mutation.type == 'childList') {
+                        console.log('TRUE: A child node has been added or removed.');
+                        initCanvasWithFabric("zoomable_canvas4");
+                    }
+                }
+            };
+            // Create an observer instance linked to the callback function
+            var observer = new MutationObserver(callback);
+            // Start observing the target node for configured mutations
+            observer.observe(elem, config);
+
+            var newElem = document.createElement("DIV");
+            newElem.innerHTML = contentTemplate;
+            elem.appendChild(newElem);
+        }
+
+        function setZoomInButtons(buttonsClass, canvas, imageIndex=0){
+            var zoomInFunc = function(canvas, imageIndex){
+                // if(imgInstance.getScaleX() * imgInstance.getScaleY() != 0)
+                // {
+                //     imgInstance.setScaleX(1);
+                //     imgInstance.setScaleY(1);
+                // }
+                console.log("This is zoom in!");
+                var imgInstance = canvas.getObjects()[imageIndex];
+                var maxScale = 2.0
+                if(imgInstance){
+                    //X
+                    if(imgInstance.getScaleX() < maxScale)
+                    {
+                        imgInstance.setScaleX(imgInstance.getScaleX() * 1.1);
+                    }
+                    if(imgInstance.getScaleX() > maxScale)
+                    {
+                        imgInstance.setScaleX(maxScale);
+                    }
+                    //Y
+                    if(imgInstance.getScaleY() < maxScale)
+                    {
+                        imgInstance.setScaleY(imgInstance.getScaleY() * 1.1);
+                    }
+                    if(imgInstance.getScaleY() > maxScale)
+                    {
+                        imgInstance.setScaleY(maxScale);
+                    }
+                    canvas.renderAll();
+                    imgInstance.setCoords();
+                }
+            };
+
+            var aButtons = document.getElementsByClassName(buttonsClass);
+            for(var i=0;i<aButtons.length;i++){
+                //Add event listener
+                aButtons[i].addEventListener("click", function(){zoomInFunc(canvas, imageIndex)});
+            }
+
+
+        }
+
+        /*Receives a list with the classes of the elements whose event handlers
+        have to be removed*/
+        function clearUIEventHandlers(aClassList){
+            var allElements = [];
+            var elementClassList
+            var currentElement;
+            var newElement;
+            //Insert all elements in a list
+            for(var i=0;i<aClassList.length;i++){
+                //Parse what is returned by document.getElementsByClassName() to an array.
+                elementClassList = [].slice.call( document.getElementsByClassName(aClassList[i]) );
+                //Append said array to global list
+                allElements = allElements.concat(elementClassList);
+            }
+            //Remove event handlers of all the retrieved elements.
+            for(var j=0;j<allElements.length;j++){
+                currentElement = allElements[j];
+                //clone to remove event handlers
+                newElement = currentElement.cloneNode(true);
+                currentElement.parentNode.replaceChild(newElement, currentElement);
+            }
+        }
+
+        var c;
+
+        window.onload = function () {
+            //c = new fabric.CanvasWithViewport("zoomable_canvas");
+            c = new fabric.Canvas("zoomable_canvas");
+
+            /*NEEDS c.isGrabMode = false*/
+            c.on({'mouse:up': function () {
+                    console.log("canvas mod.");
+                    checkObjectCentering(c)
+                }
+            });
+
+            c.on({'object:added': function () {
+                    console.log("object added");
+                    var allClasses = ["zoom-in"];
+                    clearUIEventHandlers(allClasses);
+                    setZoomInButtons(allClasses[0], c, 1);
+                }
+            });
+                
+            
+
+            //var c = new fabric.CanvasWithViewport("zoomable_canvas");
+            //var c = new fabric.Canvas("zoomable_canvas");
+            /*c.on('mouse:down',function(e) {
+              console.log('dragging');
+            });*/
+
+            // //Actualizar
+
+            // var content = '<div class="cell"><div class="buttons"><button type="button" class="zoom-in">Zoom in</button><button type="button" class="zoom-out">Zoom out</button><input type="range" min="1" max="100" value="50" class="slider" id="myRange"></div><canvas id="zoomable_canvas2" width="600px" height="600px"></canvas><img src="../peaje.jpeg" id="mi-imagen2" style="display:none" /></div>';
+            // var replaceElem = document.getElementById("c2");
+            // var newElem = document.createElement("DIV");
+
+            // //onload?
+            // // Options for the observer (which mutations to observe)
+            // var config = { attributes: false, childList: true, subtree: false };
+            // // Callback function to execute when mutations are observed
+            // var callback = function (mutationsList, observer) {
+            //     for (var mutation of mutationsList) {
+            //         if (mutation.type == 'childList') {
+            //             console.log('A child node has been added or removed.');
+            //             var c2 = new fabric.CanvasWithViewport("zoomable_canvas2");
+            //             addRawImage2Canvas(aRawImageData[1], c2);
+            //         }
+            //         else if (mutation.type == 'attributes') {
+            //             console.log('The ' + mutation.attributeName + ' attribute was modified.');
+            //         }
+            //     }
+            // };
+            // // Create an observer instance linked to the callback function
+            // var observer = new MutationObserver(callback);
+            // // Start observing the target node for configured mutations
+            // observer.observe(replaceElem, config);
+
+
+
+            // /* No dispara onload*/
+            // /*
+            // newElem.onload = function () {
+            //     var c2 = new fabric.CanvasWithViewport("zoomable_canvas2");
+            //     addRawImage2Canvas(aRawImageData[1], c2);
+            // }*/
+            // /*Next lines fires the observer callback function.*/
+            // newElem.innerHTML = content;
+            // replaceElem.appendChild(newElem);
+
+            // //document.getElementById("c1").innerHTML=content;
+            // //document.getElementById("c2").innerHTML=content;
+            // //document.getElementById("c3").innerHTML=content;
+            // //document.getElementById("c4").innerHTML=content;
+
+
+            //set grab mode and leave it as default without giving option to change it
+            c.isDrawingMode = false;
+            c.isGrabMode = false;
+
+            /* var imgElement = document.getElementById('mi-imagen');
+            imgElement.onload = function(oImg){
+              var tempCanvas = document.createElement('CANVAS');
+              var tempCtx = tempCanvas.getContext('2d');
+              var height = tempCanvas.height = this.naturalHeight;
+              var width = tempCanvas.width = this.naturalWidth;
+              tempCtx.drawImage(this, 0, 0);
+              var dataURL = tempCanvas.toDataURL();
+              fabric.Image.fromURL(dataURL, function(img) {
+                img.set({
+                  width: width,
+                  height: height,
+                  scaleX: setImageWidth / width,
+                  scaleY: setImageHeight / height,
+                  left: e.layerX,
+                  top: e.layerY,
+                })
+                c.add(img);
+              });
+            }
+            imgElement.crossOrigin = 'Anonymous';
+            imgElement.src="../peaje.jpeg"; */
+            //var imgInstance = new fabric.Image(imgElement);
+            //c.add(imgInstance);
+
+
+            //No funciona
+            /* fabric.Image.fromURL = ("data:image/jpg;base64,"+aRawImageData[1], function(img){
+              var oImg = img.set({left: 0, top: 0, angle: 00,width:100, height:100}).scale(0.9);
+              c.add(oImg).renderAll();
+            }); */
+
+            addRawImage2Canvas(aRawImageData[1], c);
+            addRawImage2Canvas(aRawImageData[0], c);
+
+            //JQUERY
+            // $(".buttons .zoom-in").click(function () {
+            //     c.setZoom(c.viewport.zoom * 1.1);
+            //     console.log("ZOOM: " + c.viewport.zoom);
+            //     return false;
+            // })
+
+            // $(".buttons .zoom-out").click(function () {
+            //     var newZoom = c.viewport.zoom / 1.1
+            //     if (newZoom < 1) {
+            //         newZoom = 1;
+            //     }
+            //     c.setZoom(newZoom);
+            //     console.log("ZOOM: " + c.viewport.zoom);
+            //     return false;
+            // })
+
+            // $(".buttons .reset").click(function () {
+            //     c.setZoom(1.0);
+            //     c.viewport.position.x = 0;
+            //     c.viewport.position.y = 0;
+
+            //     c.getObjects()[0].center();
+            //     /*VERY IMPORTANT TO UPDATE THE DRAG BOX OF THE IMAGE*/
+            //     c.getObjects()[0].setCoords();
+
+            //     setCanvasImageBrightness(1, c);
+            // })
+
+            
+
+            //---------
+            /*var ctx = c.getContext('2d');
+            ctx.fillRect(0, 0, 100, 100);*/
+
+            //Filters test
+            /*
+            var img = c.getObjects()[1];
       
-      var rawDataPrefix = "data:image/jpg;base64,"
-      var imgDOM = document.createElement("IMG");
-
-      if(rawData.indexOf("data"!==0)){
-        rawData = rawDataPrefix + rawData;
-      }
-
-      /*Fires when loading the image or image data specified in its src field.*/
-      imgDOM.onload = function(){
-          var imgInstance = new fabric.Image(imgDOM);
-          lockImageScaleAndRotation(imgInstance);
-          adaptCanvas2Image(imgDOM, fabricCanvas);
-          fabricCanvas.add(imgInstance);
-      }
-
-      imgDOM.src = rawData;
-    }
-
-    function lockImageScaleAndRotation(imgInstance){
-      imgInstance.lockScalingX = true;
-      imgInstance.lockScalingY = true;
-      imgInstance.rotation = true;
-
-      imgInstance.setControlsVisibility({
-        mt: false, 
-        mb: false, 
-        ml: false, 
-        mr: false, 
-        bl: false,
-        br: false, 
-        tl: false, 
-        tr: false,
-        mtr: false, 
-      });
-    }
-
-    function adaptCanvas2Image(imageElem, canvas){
-      canvas.setWidth(imageElem.naturalWidth);
-      canvas.setHeight(imageElem.naturalHeight);
-      canvas.renderAll();
-    }
-
-    /*Applies brightness filter only for the first image in the canvas*/
-    function setCanvasImageBrightness(bright, fabricCanvas){
-      bright = parseInt(bright);
-      if(bright === 0){
-        bright=1;
-      }
-
-      var img = fabricCanvas.getObjects()[0];
-
-      var callback = function() {
-        fabricCanvas.renderAll();
-      }
-
-      //clear previous filters
-      img.filters.length = 0;
-      img.filters.push(
-        //new fabric.Image.filters.Sepia(),
-        new fabric.Image.filters.Brightness({ brightness: parseInt(bright) }));
-      //applyFilters is async, so you have to give it a callback method to be executed at the end.
-      img.applyFilters(callback);
-
-    }
-
-    function checkObjectCentering(canvas){
-      var object = canvas.getObjects()[0];
-      if(canvas.viewport){
-
-        var convertedLeft = object.left * canvas.viewport.zoom;
-        var convertedTop = object.top * canvas.viewport.zoom;
-        var modified = false;
-
-        console.log("object.left:" + convertedLeft);
-        console.log("object.top:" + convertedTop);
-        console.log(canvas.viewport.position);
-
-        if(Math.abs(convertedLeft) > Math.abs(canvas.viewport.position.x))
-        {
-          console.log("Center H");
-          //object.left = 0;
-          object.left = canvas.viewport.position.x / canvas.viewport.zoom;
-          modified = true;
-        }
-
-        if(Math.abs(convertedTop) > Math.abs(canvas.viewport.position.y))
-        {
-          console.log("Center V");
-          //object.top = 0;
-          object.top = canvas.viewport.position.y / canvas.viewport.zoom;
-          modified = true;
-        }
-        if(modified){
-          /*Update image drag box*/
-          object.setCoords();
-          canvas.renderAll();
-        }
-      }
-    }
-
-
-    var c;
-
-    window.onload = function () {
-      //c = new fabric.CanvasWithViewport("zoomable_canvas");
-      c = new fabric.CanvasWithViewport("zoomable_canvas");
-
-      /*NEEDS c.isGrabMode = false*/
-      c.on({  
-        'mouse:up'    : function(){
-          console.log("canvas mod.");
-          checkObjectCentering(c)
-        }
-      });
-
-      //var c = new fabric.CanvasWithViewport("zoomable_canvas");
-      //var c = new fabric.Canvas("zoomable_canvas");
-      /*c.on('mouse:down',function(e) {
-        console.log('dragging');
-      });*/
-
-      //Actualizar
-      var content = '<div class="cell"><div class="buttons"><button type="button" class="zoom-in">Zoom in</button><button type="button" class="zoom-out">Zoom out</button><input type="range" min="1" max="100" value="50" class="slider" id="myRange"></div><canvas id="zoomable_canvas2" width="600px" height="600px"></canvas><img src="../peaje.jpeg" id="mi-imagen2" style="display:none" /></div>';
-      var replaceElem = document.getElementById("c2");
-      var newElem = document.createElement("DIV");
-      replaceElem.appendChild(newElem);
-      //onload?
-
-      /* No dispara onload
-      replaceElem.onload = function(){
-        var c2 = new fabric.CanvasWithViewport("zoomable_canvas2");
-        addRawImage2Canvas(aRawImageData[1], c2);
-      }
-      replaceElem.innerHTML=content;
-      */
-      //document.getElementById("c1").innerHTML=content;
-      //document.getElementById("c2").innerHTML=content;
-      //document.getElementById("c3").innerHTML=content;
-      //document.getElementById("c4").innerHTML=content;
-
+            img.filters.push(
+              new fabric.Image.filters.Sepia(),
+              new fabric.Image.filters.Brightness({ brightness: 100 }));
       
+            img.applyFilters();
       
-      //set grab mode and leave it as default without giving option to change it
-      c.isDrawingMode = false;
-      c.isGrabMode = false;
+            c.renderAll();
+            */
+            //setCanvasImageBrightness(100, c);
 
-      /* var imgElement = document.getElementById('mi-imagen');
-      imgElement.onload = function(oImg){
-        var tempCanvas = document.createElement('CANVAS');
-        var tempCtx = tempCanvas.getContext('2d');
-        var height = tempCanvas.height = this.naturalHeight;
-        var width = tempCanvas.width = this.naturalWidth;
-        tempCtx.drawImage(this, 0, 0);
-        var dataURL = tempCanvas.toDataURL();
-        fabric.Image.fromURL(dataURL, function(img) {
-          img.set({
-            width: width,
-            height: height,
-            scaleX: setImageWidth / width,
-            scaleY: setImageHeight / height,
-            left: e.layerX,
-            top: e.layerY,
-          })
-          c.add(img);
-        });
-      }
-      imgElement.crossOrigin = 'Anonymous';
-      imgElement.src="../peaje.jpeg"; */
-      //var imgInstance = new fabric.Image(imgElement);
-      //c.add(imgInstance);
-      
+            //var temp = document.getElementById("rawimg")
+            //temp.src="data:image/jpg;base64,"+aRawImageData[1];
 
-      //No funciona
-      /* fabric.Image.fromURL = ("data:image/jpg;base64,"+aRawImageData[1], function(img){
-        var oImg = img.set({left: 0, top: 0, angle: 00,width:100, height:100}).scale(0.9);
-        c.add(oImg).renderAll();
-      }); */
+            var aSliders = document.getElementsByClassName("slider");
+            for (var i = 0; i < aSliders.length; i++) {
+                //aSliders[i].oninput = function() {
+                aSliders[i].onchange = function () {
+                    console.log("slider: " + this.value);
+                    setCanvasImageBrightness(this.value, c);
+                }
+            }
 
-      addRawImage2Canvas(aRawImageData[1], c);
+            var testElem = document.getElementById("c4");
+            var testC = insertCanvas(testElem);
+        };
 
-
-      $(".buttons .zoom-in").click(function () {
-        c.setZoom(c.viewport.zoom * 1.1);
-        console.log("ZOOM: " + c.viewport.zoom);
-        return false;
-      })
-
-      $(".buttons .zoom-out").click(function () {
-        var newZoom = c.viewport.zoom / 1.1
-        if(newZoom < 1){
-          newZoom = 1;
-        }
-        c.setZoom(newZoom);
-        console.log("ZOOM: " + c.viewport.zoom);
-        return false;
-      })
-
-      $(".buttons .reset").click(function () {
-        c.setZoom(1.0);
-        c.viewport.position.x = 0;
-        c.viewport.position.y = 0;
-        
-        c.getObjects()[0].center();
-        /*VERY IMPORTANT TO UPDATE THE DRAG BOX OF THE IMAGE*/
-        c.getObjects()[0].setCoords();
-
-        setCanvasImageBrightness(1, c);
-      })
-
-      //---------
-      /*var ctx = c.getContext('2d');
-      ctx.fillRect(0, 0, 100, 100);*/
-
-      //Filters test
-      /*
-      var img = c.getObjects()[1];
-
-      img.filters.push(
-        new fabric.Image.filters.Sepia(),
-        new fabric.Image.filters.Brightness({ brightness: 100 }));
-
-      img.applyFilters();
-
-      c.renderAll();
-      */
-      //setCanvasImageBrightness(100, c);
-
-      //var temp = document.getElementById("rawimg")
-      //temp.src="data:image/jpg;base64,"+aRawImageData[1];
-
-      var aSliders = document.getElementsByClassName("slider");
-      for(var i=0;i<aSliders.length;i++){
-        //aSliders[i].oninput = function() {
-        aSliders[i].onchange = function() {
-          console.log("slider: " + this.value);
-          setCanvasImageBrightness(this.value, c);
-        }
-      }
-    };
-
-  </script>
+    </script>
 </body>
 
 </html>
