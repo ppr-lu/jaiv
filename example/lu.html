@@ -131,17 +131,17 @@
             imgInstance.lockScalingY = false;
             imgInstance.rotation = true;
 
-            // imgInstance.setControlsVisibility({
-            //     mt: false,
-            //     mb: false,
-            //     ml: false,
-            //     mr: false,
-            //     bl: false,
-            //     br: false,
-            //     tl: false,
-            //     tr: false,
-            //     mtr: false,
-            // });
+            imgInstance.setControlsVisibility({
+                mt: false,
+                mb: false,
+                ml: false,
+                mr: false,
+                bl: false,
+                br: false,
+                tl: false,
+                tr: false,
+                mtr: false,
+            });
         }
 
         function adaptCanvas2Image(imageElem, canvas) {
@@ -260,6 +260,9 @@
             canvasFabric.on({'object:added': function () {
                     // console.log("object added");
                     //setZoomInButtons("zoom-in", canvasFabric);
+                    var allClasses = ["zoom-in"]
+                    clearUIEventHandlers(allClasses, canvasFabric);
+                    setZoomInButtons(allClasses[0], canvasFabric);
                 }
             });
 
@@ -332,7 +335,7 @@
             };
 
             //var aButtons = document.getElementsByClassName(buttonsClass);
-            var aButtons = canvas.parentNode.parentNode.getElementsByClassName(buttonsClass);
+            var aButtons = canvas.getElement().parentNode.parentNode.getElementsByClassName(buttonsClass);
             for(var i=0;i<aButtons.length;i++){
                 //Add event listener
                 aButtons[i].addEventListener("click", function(){zoomInFunc(canvas, imageIndex)});
@@ -352,7 +355,7 @@
             for(var i=0;i<aClassList.length;i++){
                 //Parse what is returned by document.getElementsByClassName() to an array.
                 //elementClassList = [].slice.call( document.getElementsByClassName(aClassList[i]) );
-                elementClassList = [].slice.call( canvas.parentNode.parentNode.getElementsByClassName(aClassList[i]) );
+                elementClassList = [].slice.call( canvas.getElement().parentNode.parentNode.getElementsByClassName(aClassList[i]) );
                 //Append said array to global list
                 allElements = allElements.concat(elementClassList);
             }
@@ -381,7 +384,7 @@
             c.on({'object:added': function () {
                     console.log("object added");
                     var allClasses = ["zoom-in"];
-                    clearUIEventHandlers(allClasses);
+                    clearUIEventHandlers(allClasses, c);
                     setZoomInButtons(allClasses[0], c, 1);
                 }
             });
