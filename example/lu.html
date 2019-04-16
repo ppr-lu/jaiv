@@ -274,7 +274,8 @@
         /*Given an HTML element, inserts a canvas inside an initializes it with fabricjs*/
         //IMPROVEMENT: receive a list of elements
         function insertCanvas(elem){
-            var contentTemplate = '<div class="cell"><canvas id="zoomable_canvas4" width="600px" height="600px"></canvas></div>';
+            var cnt = 0;
+            var contentTemplate = '<div id="jaiv-cell'+cnt+'"><div class="buttons"><button type="button" class="zoom-in">+</button><button type="button" class="zoom-out">-</button><input class="bright-mod" type="range" min="-100" max="100" value="1" class="slider"><button type="button" class="img-reset">O</button></div><canvas id="zoomable_canvas'+cnt+'"</canvas></div>';
             // Options for the observer (which mutations to observe)
             var config = { attributes: false, childList: true, subtree: false };
             // Callback function to execute when mutations are observed
@@ -282,7 +283,7 @@
                 for (var mutation of mutationsList) {
                     if (mutation.type == 'childList') {
                         console.log('TRUE: A child node has been added or removed.');
-                        initCanvasWithFabric("zoomable_canvas4");
+                        initCanvasWithFabric("zoomable_canvas"+cnt);
                     }
                 }
             };
@@ -330,7 +331,8 @@
                 }
             };
 
-            var aButtons = document.getElementsByClassName(buttonsClass);
+            //var aButtons = document.getElementsByClassName(buttonsClass);
+            var aButtons = canvas.parentNode.parentNode.getElementsByClassName(buttonsClass);
             for(var i=0;i<aButtons.length;i++){
                 //Add event listener
                 aButtons[i].addEventListener("click", function(){zoomInFunc(canvas, imageIndex)});
@@ -341,7 +343,7 @@
 
         /*Receives a list with the classes of the elements whose event handlers
         have to be removed*/
-        function clearUIEventHandlers(aClassList){
+        function clearUIEventHandlers(aClassList, canvas){
             var allElements = [];
             var elementClassList
             var currentElement;
@@ -349,7 +351,8 @@
             //Insert all elements in a list
             for(var i=0;i<aClassList.length;i++){
                 //Parse what is returned by document.getElementsByClassName() to an array.
-                elementClassList = [].slice.call( document.getElementsByClassName(aClassList[i]) );
+                //elementClassList = [].slice.call( document.getElementsByClassName(aClassList[i]) );
+                elementClassList = [].slice.call( canvas.parentNode.parentNode.getElementsByClassName(aClassList[i]) );
                 //Append said array to global list
                 allElements = allElements.concat(elementClassList);
             }
