@@ -1,22 +1,11 @@
 #JustAnotherImageViewer
-It does not work with last fabric.js version, it needs the 1.4.0 version just like fabricjs.viewport. Forked from the fabricjs-viewport project:
-
-## fabricjs-viewport
-
-Simple implementation of viewport and zoom in fabricjs. 
-
-1. Doesn't change data model, so none of the objects on your canvas is changed after zooming/grabbing
-2. Supports touch devices
-3. Supports free drawing mode
-
-First [see an example](http://softwarebrothers.github.io/fabricjs-viewport/)
+An Image Viever.
 
 ### How to use it
 
-Currently it depends on jquery, however I plan to fix it soon.
-In the HEAD of your HTML file include jQuery, fabricjs and fabricjs-viewport. You can find fabricjs-viewport.js in this repo in the /dist/ directory.
-
-You can include those libraries from CDNs (order matters):
+Does not depend of jQuery (supposedly).
+This library has fabric.js as its dependency. Only version 1.4.0 has been tested, so it may not work for other versions.
+Version 1.4.0 can be found in dist/ folder:
 
 ```javascript
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
@@ -24,27 +13,27 @@ You can include those libraries from CDNs (order matters):
 <script src="fabricjs_viewport.js"></script>
 ```
 
-Next if you need to use zooming or changing viewport in your project just use fabric.CanvasWithViewport insteed of fabric.Canvas
+To initialize it:
 
-    var c = new fabric.CanvasWithViewport("id-of-your-canvas");
+    var config = {
+                //Element which content is overriden with the image viewer
+                element: document.getElementById("replace"),
+                //Rows in the image viewer
+                rows: 2,
+                //columns in the image viewer
+                columns: 2,
+                //Array with the raw data of the images. Can also be a single string.
+                //Example of this can be found in example/rawImageData.js
+                imageData: aRawImageData,
+                //If true => resize image to fit canvas
+                //false => resize canvas to fit original image size
+                adaptImageToCanvas: true,
+                // width of the canvas in case adaptImageToCanvas is true
+                width: 600,
+                // height of the canvas in case adaptImageToCanvas is true
+                height: 338
+            };
+    jaiv.initImageViewer(config);
 
-Now you are be able to:
-
-Turn on grabbing mode:
-
-```javascript
-c.isGrabMode = true;
-```
-
-With this you can change the viewport with drag and drop on the canvas.
-
-You also can zoom in and out: 
-
-```javascript
-c.setZoom(c.viewport.zoom*1.1); // zoom in by 10%
-```
-
-## License
-
-fabricjs-viewport is Copyright © 2018 SoftwareBrothers.co. It is free software, and may be redistributed under the terms specified in the [LICENSE](LICENSE.md) file.
+Check example/lu.html for an example.
 
