@@ -89,6 +89,10 @@
 
             adjustSizeToWindow: false,
 
+            proportion: 1,
+
+            margin: 0,
+
             addRawImage2Canvas: function (rawData, fabricCanvas, format = "jpg") {
 
                 var rawDataPrefix = "data:image/" + format + ";base64,";
@@ -495,14 +499,9 @@
 
                     if(config.adjustSizeToWindow === true){
                         jaiv.adjustSizeToWindow = true;
-                        /*Override supplied widht and height and calculate
-                        it to adjust it to window size*/
-                        var proportion = 16/9;
-                        jaiv.width = jaiv.rootElement.offsetWidth / jaiv.columns;
-                        /*jaiv.width = window.innerWidth / jaiv.columns;*/
-                        /*Margen*/
-                        jaiv.width *= 0.9;
-                        jaiv.height = jaiv.width / proportion;
+                        jaiv.proportion = 16/9;
+                        jaiv.margin = 20;
+                        jaiv.adjustParameters2Window();
 
                     }
                     else{
@@ -516,7 +515,7 @@
                     }
 
                     jaiv.insertTable(jaiv.rootElement, jaiv.rows, jaiv.columns, jaiv.imageData);
-
+                    window.addEventListener("resize", function(){jaiv.adjustCanvasesOnWindowResize();});
                 }
                 else{
                     console.log("An element has to be specified!");
@@ -524,7 +523,7 @@
 
             },
 
-            adjustParameters2Window(proportion = 16/9, margin = 20){
+            adjustParameters2Window(proportion = jaiv.proportion, margin = jaiv.margin){
                 jaiv.width = jaiv.rootElement.offsetWidth / jaiv.columns;
                 /*jaiv.width = window.innerWidth / jaiv.columns;*/
                 /*Margen*/
@@ -551,8 +550,8 @@
 
             adjustCanvasesOnWindowResize: function(){
                 if(jaiv.adjustSizeToWindow == true){
-                    var proportion = 16/9;
-                    var margin = 20;
+                    var proportion = jaiv.proportion;
+                    var margin = jaiv.margin;
                     jaiv.adjustParameters2Window(proportion, margin);
                     jaiv.adjustAllCanvas2Window();
                 }
@@ -575,7 +574,6 @@
                 height: 338
             };
             jaiv.initImageViewer(config);
-            window.addEventListener("resize", function(){jaiv.adjustCanvasesOnWindowResize();});
         };
 
     </script>
