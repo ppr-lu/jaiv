@@ -85,6 +85,10 @@
 
             height: -1,
 
+            canvasList: [],
+
+            adjustSizeToWindow: false,
+
             addRawImage2Canvas: function (rawData, fabricCanvas, format = "jpg") {
 
                 var rawDataPrefix = "data:image/" + format + ";base64,";
@@ -170,45 +174,48 @@
 
             checkObjectCentering: function (canvas) {
                 var object = canvas.getObjects()[0];
-                var modified = false;
-                /*The getWidth() and getHeight() methods already take the scale into account.*/
-                /*se ve fondo por la derecha => ajustar derecha*/
-                if ((object.getLeft() + object.getWidth()) < canvas.getWidth()) {
-                    console.log("Ajustar Derecha");
-                    object.setLeft(canvas.getWidth() - object.getWidth());
-                    modified = true;
-                }
-                /*se ve fondo por la iquierda => ajustar izquierda */
-                if (object.getLeft() > 0) {
-                    console.log("Ajustar Izquierda");
-                    object.setLeft(0);
-                    modified = true;
-                }
-                /*se ve fondo por abajo => ajustar abajo*/
-                if ((object.getTop() + object.getHeight()) < canvas.getHeight()) {
-                    console.log("Ajustar Abajo");
-                    object.setTop(canvas.getHeight() - object.getHeight());
-                    modified = true;
-                }
-                /*se ve fondo por  arriba => ajustar arriba*/
-                if (object.getTop() > 0) {
-                    console.log("Ajustar Arriba");
-                    object.setTop(0);
-                    modified = true;
-                }
+                if(object){
+                    var modified = false;
+                    /*The getWidth() and getHeight() methods already take the scale into account.*/
+                    /*se ve fondo por la derecha => ajustar derecha*/
+                    if ((object.getLeft() + object.getWidth()) < canvas.getWidth()) {
+                        console.log("Ajustar Derecha");
+                        object.setLeft(canvas.getWidth() - object.getWidth());
+                        modified = true;
+                    }
+                    /*se ve fondo por la iquierda => ajustar izquierda */
+                    if (object.getLeft() > 0) {
+                        console.log("Ajustar Izquierda");
+                        object.setLeft(0);
+                        modified = true;
+                    }
+                    /*se ve fondo por abajo => ajustar abajo*/
+                    if ((object.getTop() + object.getHeight()) < canvas.getHeight()) {
+                        console.log("Ajustar Abajo");
+                        object.setTop(canvas.getHeight() - object.getHeight());
+                        modified = true;
+                    }
+                    /*se ve fondo por  arriba => ajustar arriba*/
+                    if (object.getTop() > 0) {
+                        console.log("Ajustar Arriba");
+                        object.setTop(0);
+                        modified = true;
+                    }
 
-                if (modified) {
-                    /*Update image drag box*/
-                    object.setCoords();
-                    canvas.renderAll();
+                    if (modified) {
+                        /*Update image drag box*/
+                        object.setCoords();
+                        canvas.renderAll();
+                    }
                 }
-
             },
 
             /*Given a canvas element, initializes it with fabricjs and adds the image whose raw data is reaceived as a parameter*/
             initCanvasWithFabric: function (canvasId, rawImageData) {
 
                 var canvasFabric = new fabric.Canvas(canvasId);
+
+                jaiv.canvasList.push(canvasFabric);
 
                 /*Event when moving the element inside the canvas.
                 Only checks the first one inside canvas.getObjects()*/
@@ -253,7 +260,7 @@
                 var buttonBoxStyle = "border: 1px solid black; padding:5px; ";
                 var buttonStyle = "margin: 0px 5px;";
                 var canvasStyle = "";
-                var contentTemplate = '<div style="' + cellStyle + '" id="jaiv-cell' + cnt + '"><div class="buttons" style="' + buttonBoxStyle + '"><button type="button" class="jaiv-zoom-in" style="' + buttonStyle + '">Zoom +</button><button type="button" class="jaiv-zoom-out" style="' + buttonStyle + '">Zoom -</button><span>Brightness:</span><input class="jaiv-bright-slider slider" type="range" min="-100" max="100" value="1" style="' + buttonStyle + '"><button type="button" class="jaiv-reset" style="' + buttonStyle + '">Reset</button></div><canvas id="zoomable_canvas' + cnt + '" style="' + canvasStyle + '"></canvas></div>';
+                var contentTemplate = '<div style="' + cellStyle + '" id="jaiv-cell' + cnt + '"><div class="buttons" style="' + buttonBoxStyle + '"><button type="button" class="jaiv-zoom-in" style="' + buttonStyle + '">Zoom +</button><button type="button" class="jaiv-zoom-out" style="' + buttonStyle + '">Zoom -</button><button type="button" class="jaiv-reset" style="' + buttonStyle + '">Reset</button><div style="display: inline-block;"><span>Brightness:</span><input class="jaiv-bright-slider slider" type="range" min="-100" max="100" value="1" style="' + buttonStyle + '"></div></div><canvas id="zoomable_canvas' + cnt + '" style="' + canvasStyle + '"></canvas></div>';
                 /*Options for the observer (which mutations to observe)*/
                 var config = { attributes: false, childList: true, subtree: false };
                 /*Callback function to execute when mutations are observed*/
@@ -459,48 +466,96 @@
             },
 
             initImageViewer: function(config){
-                var rows, columns, element, imageData, adaptImageToCanvas;
+                /*var rows, columns, element, imageData, adaptImageToCanvas;*/
                 if(config.element){
-                    element = config.element;
+                    jaiv.rootElement = config.element;
                     if(config.rows){
-                        rows = config.rows;
+                        jaiv.rows = config.rows;
                     }
                     else{
-                        rows = 1;
+                        jaiv.rows = 1;
                     }
 
                     if(config.columns){
-                        columns = config.columns;
+                        jaiv.columns = config.columns;
                     }
                     else{
-                        columns = 1;
+                        jaiv.columns = 1;
                     }
                     if(config.imageData){
-                        imageData = config.imageData;
+                        jaiv.imageData = config.imageData;
                     }
                     else{
-                        imageData="";
+                        jaiv.imageData="";
                     }
 
                     if(config.adaptImageToCanvas === true || config.adaptImageToCanvas === false){
                         jaiv.adaptImageToCanvas = config.adaptImageToCanvas;
                     }
 
-                    if( !isNaN(config.width) ){
-                        jaiv.width = parseInt(config.width);
+                    if(config.adjustSizeToWindow === true){
+                        jaiv.adjustSizeToWindow = true;
+                        /*Override supplied widht and height and calculate
+                        it to adjust it to window size*/
+                        var proportion = 16/9;
+                        jaiv.width = jaiv.rootElement.offsetWidth / jaiv.columns;
+                        /*jaiv.width = window.innerWidth / jaiv.columns;*/
+                        /*Margen*/
+                        jaiv.width *= 0.9;
+                        jaiv.height = jaiv.width / proportion;
+
+                    }
+                    else{
+                        if( !isNaN(config.width) ){
+                            jaiv.width = parseInt(config.width);
+                        }
+
+                        if( !isNaN(config.height) ){
+                            jaiv.height = parseInt(config.height);
+                        }
                     }
 
-                    if( !isNaN(config.height) ){
-                        jaiv.height = parseInt(config.height);
-                    }
-
-                    jaiv.insertTable(element, rows, columns, imageData);
+                    jaiv.insertTable(jaiv.rootElement, jaiv.rows, jaiv.columns, jaiv.imageData);
 
                 }
                 else{
                     console.log("An element has to be specified!");
                 }
 
+            },
+
+            adjustParameters2Window(proportion = 16/9, margin = 20){
+                jaiv.width = jaiv.rootElement.offsetWidth / jaiv.columns;
+                /*jaiv.width = window.innerWidth / jaiv.columns;*/
+                /*Margen*/
+                /*jaiv.width *= 0.9;*/
+                jaiv.width -= margin;
+                jaiv.height = jaiv.width / proportion;
+            },
+
+            adjustCanvas2Window: function(canvas){
+                canvas.setWidth(jaiv.width);
+                canvas.setHeight(jaiv.height);
+                var imgInstance = canvas.getObjects()[0];
+                if(imgInstance){
+                    jaiv.adaptImage2Canvas(imgInstance, canvas);
+                }
+                
+            },
+
+            adjustAllCanvas2Window: function(){
+                for(var i=0;i<jaiv.canvasList.length;i++){
+                    jaiv.adjustCanvas2Window(jaiv.canvasList[i]);
+                }
+            },
+
+            adjustCanvasesOnWindowResize: function(){
+                if(jaiv.adjustSizeToWindow == true){
+                    var proportion = 16/9;
+                    var margin = 20;
+                    jaiv.adjustParameters2Window(proportion, margin);
+                    jaiv.adjustAllCanvas2Window();
+                }
             }
 
 
@@ -511,14 +566,16 @@
             /*jaiv.insertTable(document.getElementById("replace"), 2, 2, aRawImageData);*/
             config = {
                 element: document.getElementById("replace"),
-                rows: 2,
+                rows: 1,
                 columns: 2,
                 imageData: aRawImageData,
                 adaptImageToCanvas: true,
+                adjustSizeToWindow: true,
                 width: 600,
                 height: 338
             };
             jaiv.initImageViewer(config);
+            window.addEventListener("resize", function(){jaiv.adjustCanvasesOnWindowResize();});
         };
 
     </script>

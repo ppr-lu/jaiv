@@ -1,5 +1,6 @@
-#JustAnotherImageViewer
-An Image Viever.
+# JustAnotherImageViewer
+
+An Image Viever done in JavaScript.
 
 ### How to use it
 
