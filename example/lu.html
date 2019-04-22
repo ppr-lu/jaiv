@@ -262,9 +262,18 @@
                 var cnt = index;
                 var cellStyle = "border: 1px solid black; padding:5px; ";
                 var buttonBoxStyle = "border: 1px solid black; padding:5px; ";
-                var buttonStyle = "margin: 0px 5px;";
+                var responsiveSize = "min-width: 20px; max-width: 1000px; width=100%;"
+                var buttonStyle = responsiveSize +
+                "padding:0.7em 1.4em; margin:10em 10em; font-weight:400; text-align:center;"    
+                var divSliderStyle = "display: inline-block; margin: 0em 1.3em"
+                var sliderStyle = responsiveSize+"margin: 0.3em 1.3em; display: inline-block;"            
                 var canvasStyle = "";
-                var contentTemplate = '<div style="' + cellStyle + '" id="jaiv-cell' + cnt + '"><div class="buttons" style="' + buttonBoxStyle + '"><button type="button" class="jaiv-zoom-in" style="' + buttonStyle + '">Zoom +</button><button type="button" class="jaiv-zoom-out" style="' + buttonStyle + '">Zoom -</button><button type="button" class="jaiv-reset" style="' + buttonStyle + '">Reset</button><div style="display: inline-block;"><span>Brightness:</span><input class="jaiv-bright-slider slider" type="range" min="-100" max="100" value="1" style="' + buttonStyle + '"></div></div><canvas id="zoomable_canvas' + cnt + '" style="' + canvasStyle + '"></canvas></div>';
+                var contentTemplate = '<div style="' + cellStyle + '" id="jaiv-cell' + cnt + '"><div class="buttons" style="' + buttonBoxStyle + 
+                '"><button type="button" class="jaiv-zoom-in" style="' + buttonStyle + '">Zoom +</button><button type="button" class="jaiv-zoom-out" style="' + 
+                buttonStyle + '">Zoom -</button><button type="button" class="jaiv-reset" style="' + buttonStyle + '">Reset</button>' + 
+                '<div style="'+divSliderStyle+'"><span>Brightness:</span>'+
+                '<input class="jaiv-bright-slider slider" type="range" min="-100" max="100" value="1" style="' + 
+                sliderStyle + '"></div></div><canvas id="zoomable_canvas' + cnt + '" style="' + canvasStyle + '"></canvas></div>';
                 /*Options for the observer (which mutations to observe)*/
                 var config = { attributes: false, childList: true, subtree: false };
                 /*Callback function to execute when mutations are observed*/
@@ -302,20 +311,8 @@
                     var imgInstance = canvas.getObjects()[imageIndex];
                     var maxScale = 3.0;
                     if (imgInstance) {
-
-                        if (imgInstance.getScaleX() < maxScale) {
-                            imgInstance.setScaleX(imgInstance.getScaleX() * 1.1);
-                        }
-                        if (imgInstance.getScaleX() > maxScale) {
-                            imgInstance.setScaleX(maxScale);
-                        }
-
-                        if (imgInstance.getScaleY() < maxScale) {
-                            imgInstance.setScaleY(imgInstance.getScaleY() * 1.1);
-                        }
-                        if (imgInstance.getScaleY() > maxScale) {
-                            imgInstance.setScaleY(maxScale);
-                        }
+                        imgInstance.setScaleX(imgInstance.getScaleX() * 1.1);
+                        imgInstance.setScaleY(imgInstance.getScaleY() * 1.1);
                         canvas.renderAll();
                         imgInstance.setCoords();
                     }
