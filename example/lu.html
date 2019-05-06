@@ -93,7 +93,11 @@
 
             margin: 0,
 
-            addRawImage2Canvas: function (rawData, fabricCanvas, format = "jpg") {
+            addRawImage2Canvas: function (rawData, fabricCanvas, format) {
+
+                if(format === undefined){
+                    format = "jpg";
+                }
 
                 var rawDataPrefix = "data:image/" + format + ";base64,";
                 var imgDOM = document.createElement("IMG");
@@ -258,7 +262,10 @@
             /*Very important to specify and index when inserting more than one canvas.
             This argument must be different for each time this function is called.
             Recommended to call it inside a loop passing it the loop number as the index.*/
-            insertCanvas: function (elem, aRawImageDataList, index = 0) {
+            insertCanvas: function (elem, aRawImageDataList, index) {
+                if(index === undefined){
+                    index = 0;
+                }
                 var cnt = index;
                 var cellStyle = "border: 1px solid black; padding:5px; ";
                 var buttonBoxStyle = "border: 1px solid black; padding:5px; ";
@@ -278,7 +285,8 @@
                 var config = { attributes: false, childList: true, subtree: false };
                 /*Callback function to execute when mutations are observed*/
                 var callback = function (mutationsList, observer) {
-                    for (var mutation of mutationsList) {
+                    for(var i = 0; i<mutationsList.length; i++){
+                        var mutation = mutationsList[i];
                         if (mutation.type == 'childList') {
                             console.log('TRUE: A child node has been added or removed.');
                             if (aRawImageDataList.constructor === Array) {
@@ -305,7 +313,10 @@
                 elem.appendChild(newElem);
             },
 
-            setZoomInButtons: function (buttonsClass, canvas, imageIndex = 0) {
+            setZoomInButtons: function (buttonsClass, canvas, imageIndex) {
+                if(imageIndex === undefined){
+                    imageIndex = 0;
+                }
                 var zoomInFunc = function (canvas, imageIndex) {
                     console.log("This is zoom in!");
                     var imgInstance = canvas.getObjects()[imageIndex];
@@ -325,7 +336,10 @@
                 }
             },
 
-            setZoomOutButtons: function (buttonsClass, canvas, imageIndex = 0) {
+            setZoomOutButtons: function (buttonsClass, canvas, imageIndex) {
+                if(imageIndex === undefined){
+                    imageIndex = 0;
+                }
                 var zoomOutFunc = function (canvas, imageIndex) {
                     console.log("This is zoom out!");
                     var imgInstance = canvas.getObjects()[imageIndex];
@@ -373,7 +387,13 @@
                 }
             },
 
-            setResetCanvasButtons: function (buttonsClass, canvas, imageIndex = 0, slidersClass = "jaiv-bright-slider") {
+            setResetCanvasButtons: function (buttonsClass, canvas, imageIndex, slidersClass) {
+                if(imageIndex === undefined){
+                    imageIndex = 0;
+                }
+                if(slidersClass === undefined){
+                    slidersClass = "jaiv-bright-slider";
+                }
                 var reset = function (canvas, imageIndex) {
                     console.log("This is canvas reset!");
                     var imgInstance = canvas.getObjects()[imageIndex];
@@ -435,7 +455,13 @@
 
             /*Insert table inside an element. In each of its cells a canvas can be inserted*/
             /*It is harcoded to be 2x2*/
-            insertTable: function (elem, rows = 2, columns = 2, aRawImageDataList) {
+            insertTable: function (elem, rows, columns, aRawImageDataList) {
+                if(rows === undefined){
+                    rows = 2;
+                }
+                if(columns === undefined){
+                    columns = 2;
+                }
 
                 tbl = document.createElement('table');
                 var tr, td;
@@ -451,7 +477,8 @@
 
                 var config = { attributes: false, childList: true, subtree: false };
                 var callback = function (mutationsList, observer) {
-                    for (var mutation of mutationsList) {
+                    for(var i = 0; i<mutationsList.length; i++){
+                        var mutation = mutationsList[i];
                         if (mutation.type == 'childList') {
                             console.log('Table created! SHOULD ALREADY EXIST!');
                             var allCells = tbl.getElementsByTagName("td");
@@ -520,7 +547,13 @@
 
             },
 
-            adjustParameters2Window(proportion = jaiv.proportion, margin = jaiv.margin){
+            adjustParameters2Window: function(proportion, margin){
+                if(proportion === undefined){
+                    proportion = jaiv.proportion;
+                }
+                if(margin === undefined){
+                    margin = jaiv.margin;
+                }
                 jaiv.width = jaiv.rootElement.offsetWidth / jaiv.columns;
                 /*jaiv.width = window.innerWidth / jaiv.columns;*/
                 /*Margen*/
